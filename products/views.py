@@ -4,7 +4,7 @@ from admin_panel.decorators import admin_login_required
 # Create your views here.
 @admin_login_required
 def product_home(request):
-    return HttpResponse("这是产品列表")
+    return render(request,'product_home.html')
 @admin_login_required
 def product_detail(request):
-    return HttpResponse("这是产品明细")
+    return render(request,'product_detail.html')
