@@ -1,0 +1,31 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>测试页面</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}">
+</head>
+<body>
+  <h1 class="text-primary">Hello Bootstrap!</h1>
+
+  <button id="btn" class="btn btn-success">点我测试 jQuery</button>
+
+  <!-- jQuery -->
+  <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
+  <!-- Bootstrap JS -->
+  <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js '%}"></script>
+
+  <script>
+    // 测试 jQuery 是否成功
+    $(document).ready(function(){
+      console.log("✅ jQuery 已经加载成功！");
+      $("#btn").click(function(){
+        alert("jQuery 按钮点击事件生效啦！");
+      });
+    });
+  </script>
+</body>
+</html>
