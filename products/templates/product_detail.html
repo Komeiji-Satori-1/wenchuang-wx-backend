@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +6,13 @@
     <title>Title</title>
 </head>
 <body>
-
+    <div class="container mt-4">
+    <h2>{{ product.name }}</h2>
+    <div style="text-decoration-color: #664d03"><p>描述：{{ product.description }}</p></div>
+    <p>价格: {{ product.price }}</p>
+    <p>库存: {{ product.stock }}</p>
+    <p>类别: {{ product.category.name }}</p>
+    <p>创建时间: {{ product.created_at }}</p>
+</div>
 </body>
 </html>
