@@ -24,13 +24,16 @@ mysqlclient==2.2.0 # 或者 PyMySQL==1.1.0
 djangorestframework==3.15.2
 MySQL==8.0.
 ### 👉 推荐在虚拟环境中运行，先创建虚拟环境：
-bash
+bash：  
+
 python -m venv .venv
 ### 然后激活虚拟环境：
-Windows (PowerShell):
+Windows (PowerShell):  
+
 .venv\Scripts\activate
 
-Mac/Linux:
+Mac/Linux:  
+
 source .venv/bin/activate
 ### 安装依赖：
 pip install -r requirements.txt
@@ -70,8 +73,7 @@ python manage.py runserver
 http://127.0.0.1:8000/
 
 ## 📌 功能模块
-用户登录与权限验证  
-
+用户登录与权限验证
 后台管理
 商品管理
 订单管理
