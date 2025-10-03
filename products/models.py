@@ -1,5 +1,5 @@
 from django.db import models
-
+from admin_panel.models import AdminUser
 # Create your models here.
 class Category(models.Model):
     id = models.AutoField(primary_key=True)
@@ -45,6 +45,7 @@ class ProductLog(models.Model):
 
     id = models.AutoField(primary_key=True)
     product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="logs")
+    admin = models.ForeignKey(AdminUser,on_delete=models.SET_NULL, null=True,blank=True, related_name='product_logs')
     action = models.CharField(max_length=50, choices=ACTION_CHOICES)
     change_amount = models.IntegerField(default=0)  # 库存变化量
     old_value = models.JSONField(null=True, blank=True)

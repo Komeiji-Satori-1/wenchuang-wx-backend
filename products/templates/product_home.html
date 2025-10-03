@@ -89,6 +89,54 @@
     </div>
 </div>
 
+<!-- 编辑产品的模态框 -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">编辑产品</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editProductForm">
+          {% csrf_token %}
+          <input type="hidden" name="productId" id="editProductId">
+
+          <div class="mb-3">
+            <label class="form-label">产品名称</label>
+            <input type="text" class="form-control" name="name" id="editProductName" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">价格</label>
+            <input type="number" step="0.01" class="form-control" name="price" id="editProductPrice" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">库存</label>
+            <input type="text" class="form-control" name="stock" id="editProductStock" required>
+          </div>
+
+
+
+
+
+          <div class="mb-3">
+            <label class="form-label">修改原因</label>
+            <select class="form-select" id="action_choice" name="action_choice" required>
+            <option value="update">修改商品信息</option>
+            <option value="stock_in">进货入库</option>
+            <option value="stock_out">售出出库</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">保存修改</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <!-- jQuery -->
@@ -118,22 +166,6 @@ $(document).ready(function() {
         }
     });
 
-    // 编辑按钮事件
-    $('#productTable').on('click', '.edit-btn', function() {
-        const row = $(this).closest('tr');
-        const productName = row.find('td:eq(1)').text();
-        alert('编辑产品: ' + productName);
-    });
-
-    // 删除按钮事件
-    $('#productTable').on('click', '.delete-btn', function() {
-        const row = $(this).closest('tr');
-        const productName = row.find('td:eq(1)').text();
-        if(confirm('确定删除产品 "' + productName + '" 吗？')) {
-            row.remove();
-        }
-    });
-
     $('#productTable').on('click', '.info-btn', function() {
     const productId = $(this).data('id');
     if (productId) {
@@ -155,6 +187,62 @@ $(document).ready(function() {
             }
         });
     });
+
+    $('#productTable').on('click', '.edit-btn', function () {
+        const row = $(this).closest('tr'); // 找到当前这一行
+        const productId = row.find('td:eq(0)').text(); // 取第0列（ID）
+        const productName = row.find('td:eq(1)').text(); // 取第1列（名称）
+        const productPrice = row.find('td:eq(3)').text(); // 取第3列（价格）
+        const produceStock = row.find('td:eq(4)').text();
+        const ProductCategory = row.find('td:eq(2)').text();
+
+
+        // 把数据填入到Modal里的表单
+        $('#editProductId').val(productId);
+        $('#editProductName').val(productName);
+        $('#editProductPrice').val(productPrice);
+        $('#editProductStock').val(produceStock);
+        $('#editProductCategory').val(ProductCategory)
+
+
+
+        // 显示Modal
+        $('#editProductModal').modal('show');
+    });
+
+    $('#editProductForm').submit(function (e) {
+        e.preventDefault(); // 阻止表单默认刷新页面
+        const productId = $('#editProductId').val();
+        $.post(`/products/edit/${productId}/`, $(this).serialize(), function (data) {
+            if (data.success) {
+                alert("修改成功！");
+                location.reload(); // 刷新页面
+            } else {
+                alert("修改失败：" + data.error);
+            }
+        });
+    });
+
+    $('#productTable').on('click', '.delete-btn', function () {
+        const row = $(this).closest('tr');
+        const productId = row.find('td:eq(0)').text();
+        const productName = row.find('td:eq(1)').text();
+
+        if (confirm("确定要删除产品【" + productName + "】吗？")) {
+            $.post("/products/delete/", {
+                productId: productId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            }, function (data) {
+                if (data.success) {
+                    alert("删除成功！");
+                    row.remove(); // 删除这一行
+                } else {
+                    alert("删除失败：" + data.error);
+                }
+            });
+        }
+    });
+
 
 });
 </script>
