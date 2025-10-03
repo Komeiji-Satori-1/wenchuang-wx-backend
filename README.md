@@ -10,7 +10,7 @@
 - **操作系统**: Windows 10 / 11  
 - **Python**: 3.12  
 - **Django**: 5.0+  
-- **数据库**: MySQL 8.0  
+- **数据库**: MySQL 8.0.43  
 - **前端**: 微信小程序 (WXML, WXSS, JS)  
 - **包管理**: pip / virtualenv  
 
