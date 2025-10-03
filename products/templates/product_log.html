@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>操作日志</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}" rel="stylesheet">
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="{% static 'plugins/DataTable/css/dataTables.bootstrap5.min.css' %}">
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="mb-4">📜 产品操作日志</h2>
+  <a href="/products/" class="btn btn-info">返回</a>
+  <table id="logTable" class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+
+        <th>产品</th>
+        <th>操作类型</th>
+        <th>修改前名称</th>
+        <th>修改前价格</th>
+        <th>修改前库存</th>
+        <th>修改后</th>
+        <th>变动数量</th>
+        <th>操作人</th>
+        <th>操作时间</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in logs %}
+      <tr>
+
+        <td>{{ entry.product.name }}</td>
+        <td>
+          {% if entry.action == "('update',)" %}
+            <span class="badge bg-primary">修改</span>
+          {% elif entry.action == "('stock_in',)" %}
+            <span class="badge bg-success">入库</span>
+          {% elif entry.action == "('stock_out',)" %}
+            <span class="badge bg-danger">出库</span>
+          {% elif entry.action == "('create',)" %}
+            <span class="badge bg-secondary">添加产品</span>
+          {% else %}
+              <span class="badge bg-dark">删除产品</span>
+          {% endif %}
+        </td>
+        <td>{{ entry.old_value.name }}</td>
+        <td>{{ entry.old_value.price }}</td>
+        <td>{{ entry.old_value.stock }}</td>
+
+        <td>{{ entry.new_value }}</td>
+        <td>
+          {% if entry.change_amount > 0 %}
+            <span class="text-success">+{{ entry.change_amount }}</span>
+          {% elif entry.change_amount < 0 %}
+            <span class="text-danger">{{ entry.change_amount }}</span>
+          {% else %}
+            {{ entry.change_amount }}
+          {% endif %}
+        </td>
+        <td>{{ entry.admin.username }}</td>
+        <td>{{ entry.created_at|date:"Y-m-d H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- jQuery -->
+<script src="{% static 'js/jquery-3.7.1.js' %}"></script>
+<!-- DataTables JS -->
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/DataTable/js/dataTables.bootstrap5.min.js' %}"></script>
+<!-- Bootstrap JS -->
+<script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
+
+<script>
+$(document).ready(function () {
+  $('#logTable').DataTable({
+    "pageLength": 10,
+    "lengthMenu": [10, 20, 50],
+    "order": [[7, "desc"]], // 默认按时间倒序
+    "language": {
+      "search": "🔍 搜索日志:",
+      "lengthMenu": "每页显示 _MENU_ 条",
+      "info": "第 _START_ 到 _END_ 条，共 _TOTAL_ 条",
+      "paginate": {
+        "first": "首页",
+        "last": "末页",
+        "next": "下一页",
+        "previous": "上一页"
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>

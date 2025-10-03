@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render,HttpResponse,get_object_or_404
 from admin_panel.decorators import admin_login_required
-from .models import Product,Category,ProductLog
+from .models import Product,Category,ProductLog,AdminUser
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -104,3 +104,7 @@ def delete_product(request, product_id):
         )
         return JsonResponse({"success": True})
     return JsonResponse({"success": False, "error": "Invalid request method"})
+
+def product_log(request):
+    logs = ProductLog.objects.select_related("product", "admin").all().order_by("-created_at")
+    return render(request, "product_log.html", {"logs": logs})
