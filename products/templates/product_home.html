@@ -25,6 +25,7 @@
             <tr>
                 <th>ID</th>
                 <th>名称</th>
+                <th>图片</th>
                 <th>类别</th>
                 <th>价格</th>
                 <th>库存</th>
@@ -37,6 +38,14 @@
             <tr>
                 <td>{{ product.id }}</td>
                 <td>{{ product.name }}</td>
+                <td>
+                  {% if product.image %}
+                      <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 80px; height: auto;">
+                  {% else %}
+                      无图片
+                  {% endif %}
+                </td>
+
                 <td>{{ product.category.name }}</td>
                 <td>{{ product.price }}</td>
                 <td>{{ product.stock }}</td>
@@ -61,7 +70,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
             </div>
             <div class="modal-body">
-                <form id="addProductForm">
+                <form id="addProductForm" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label class="form-label">产品名称</label>
@@ -79,6 +88,12 @@
                         <label class="form-label">库存</label>
                         <input type="number" class="form-control" name="stock" required>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">上传图片</label>
+                        <input type="file" class="form-control" name="image" accept="image/*">
+                    </div>
+
+
                     <div class="mb-3">
                         <label class="form-label">类别</label>
                         <select class="form-select" name="category" required>
@@ -103,7 +118,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <form id="editProductForm">
+        <form id="addProductForm" enctype="multipart/form-data">
           {% csrf_token %}
           <input type="hidden" name="productId" id="editProductId">
 
@@ -121,10 +136,10 @@
             <label class="form-label">库存</label>
             <input type="text" class="form-control" name="stock" id="editProductStock" required>
           </div>
-
-
-
-
+          <div class="mb-3">
+              <label class="form-label">上传图片</label>
+              <input type="file" class="form-control" name="image" accept="image/*">
+          </div>
 
           <div class="mb-3">
             <label class="form-label">修改原因</label>
@@ -182,16 +197,31 @@ $(document).ready(function() {
 
 
     $('#addProductForm').submit(function (e) {
-        e.preventDefault();
-        $.post("{% url 'products:add_product' %}", $(this).serialize(), function (data) {
+    e.preventDefault();
+
+    const formData = new FormData(this);  // ✅ 用 FormData 包装整个表单
+
+    $.ajax({
+        url: "{% url 'products:add_product' %}",
+        type: "POST",
+        data: formData,
+        processData: false,  // ✅ 告诉 jQuery 不处理数据
+        contentType: false,  // ✅ 告诉 jQuery 不设置内容类型
+        success: function (data) {
             if (data.success) {
                 alert("产品添加成功！");
-                location.reload();  // 刷新页面
+                location.reload();
             } else {
                 alert("添加失败：" + data.error);
             }
-        });
+        },
+        error: function (xhr) {
+            alert("请求失败：" + xhr.statusText);
+        }
     });
+
+    });
+
 
     $('#productTable').on('click', '.edit-btn', function () {
         const row = $(this).closest('tr'); // 找到当前这一行
@@ -216,17 +246,31 @@ $(document).ready(function() {
     });
 
     $('#editProductForm').submit(function (e) {
-        e.preventDefault(); // 阻止表单默认刷新页面
-        const productId = $('#editProductId').val();
-        $.post(`/products/edit/${productId}/`, $(this).serialize(), function (data) {
+    e.preventDefault();  // 阻止表单默认刷新
+
+    const productId = $('#editProductId').val();
+    const formData = new FormData(this); // 封装表单数据（含文件）
+
+    $.ajax({
+        url: `/products/edit/${productId}/`,
+        type: 'POST',
+        data: formData,
+        processData: false,  // 不转换数据
+        contentType: false,  // 不设定 Content-Type
+        success: function (data) {
             if (data.success) {
                 alert("修改成功！");
-                location.reload(); // 刷新页面
+                location.reload();
             } else {
                 alert("修改失败：" + data.error);
             }
-        });
+        },
+        error: function (xhr) {
+            alert("请求出错：" + xhr.statusText);
+        }
     });
+});
+
 
     $('#productTable').on('click', '.delete-btn', function () {
         const row = $(this).closest('tr');

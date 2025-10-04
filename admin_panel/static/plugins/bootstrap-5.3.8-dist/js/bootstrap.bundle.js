@@ -4844,7 +4844,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/template-factory.js
+   * Bootstrap util/templates-factory.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */

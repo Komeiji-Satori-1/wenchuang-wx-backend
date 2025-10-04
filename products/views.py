@@ -19,6 +19,7 @@ def add_product(request):
         category_id = request.POST['category']
         stock = request.POST['stock']
         description = request.POST['description']
+        image = request.FILES.get('image')
 
         try:
             category = Category.objects.get(id=category_id)
@@ -29,11 +30,12 @@ def add_product(request):
                 category=category,
                 stock=stock,
                 description=description,
+                image=image,
 
                 )
             ProductLog.objects.create(
                 product=product,
-                action='create',
+                action="'create',",
                 old_value='',
                 new_value=f'产品 {product.name} 创建成功',
                 change_amount=product.stock,
@@ -72,6 +74,8 @@ def edit_product(request, product_id):
         product.category = request.POST.get('category', product.category)
 
         change_amount = int(product.stock) - int(old_stock)
+        if 'image' in request.FILES:
+            product.image = request.FILES['image']
 
         product.save()
 
