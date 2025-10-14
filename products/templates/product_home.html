@@ -2,154 +2,172 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>产品管理后台</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品管理后台</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}" rel="stylesheet">
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="{% static 'plugins/DataTable/css/dataTables.bootstrap5.min.css' %}">
+  <!-- Bootstrap -->
+  <link href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}" rel="stylesheet">
+  <!-- DataTables -->
+  <link href="{% static 'plugins/DataTable/css/dataTables.bootstrap5.min.css' %}" rel="stylesheet">
+  <style>
+        body { background-color: #f7f9fc; }
+        .card { border-radius: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn { border-radius: 10px; }
+        table img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.3em 0.8em !important;
+            border-radius: 8px !important;
+            background-color: #f0f0f0 !important;
+            border: none !important;
+            margin: 2px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+        th:first-child, td:first-child {
+            display: none;
+        }
+  </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h2 class="mb-4">产品列表</h2>
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">➕ 添加产品</button>
-    <!-- 查看日志按钮（跳转） -->
-    <a href="/products/log/" class="btn btn-info">
-      📜 查看操作日志
-    </a>
-    <a href="/index/" class="btn btn-info">返回</a>
-    <table id="productTable" class="table table-striped table-bordered">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>名称</th>
-                <th>图片</th>
-                <th>类别</th>
-                <th>价格</th>
-                <th>库存</th>
-                <th>上架时间</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-            <tr>
-                <td>{{ product.id }}</td>
-                <td>{{ product.name }}</td>
-                <td>
-                  {% if product.image %}
-                      <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 80px; height: auto;">
-                  {% else %}
-                      无图片
-                  {% endif %}
-                </td>
-
-                <td>{{ product.category.name }}</td>
-                <td>{{ product.price }}</td>
-                <td>{{ product.stock }}</td>
-                <td>{{ product.created_at|date:"Y-m-d" }}</td>
-                <td>
-                    <button class="btn btn-sm btn-primary edit-btn">编辑</button>
-                    <button class="btn btn-sm btn-info info-btn " data-id="{{product.id}}">详情</button>
-                    <button class="btn btn-sm btn-danger delete-btn ">删除</button>
-
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">添加产品</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="关闭"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addProductForm" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label">产品名称</label>
-                        <input type="text" class="form-control" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">价格</label>
-                        <input type="number" step="0.01" class="form-control" name="price" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">描述</label>
-                        <input type="text" class="form-control" name="description" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">库存</label>
-                        <input type="number" class="form-control" name="stock" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">上传图片</label>
-                        <input type="file" class="form-control" name="image" accept="image/*">
-                    </div>
-
-
-                    <div class="mb-3">
-                        <label class="form-label">类别</label>
-                        <select class="form-select" name="category" required>
-                            {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success w-100">提交</button>
-                </form>
-            </div>
-        </div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📦 产品管理后台</h2>
+    <div>
+      <a href="/products/log/" class="btn btn-secondary me-2">📜 查看操作日志</a>
+      <a href="/index/" class="btn btn-info">🏠 返回主页</a>
     </div>
+  </div>
+
+  <!-- 添加按钮 -->
+  <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addProductModal">➕ 添加产品</button>
+
+  <!-- 产品表格 -->
+  <table id="productTable" class="table table-striped table-bordered align-middle">
+    <thead class="table-dark">
+      <tr>
+        <th>id</th>
+        <th>名称</th>
+        <th>图片</th>
+        <th>类别</th>
+        <th>价格</th>
+        <th>库存</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td>{{ p.id }}</td>
+        <td>{{ p.name }}</td>
+        <td>
+          {% if p.image %}
+            <img src="{{ p.image.url }}" alt="{{ p.name }}" style="width:80px;height:auto;border-radius:5px;">
+          {% else %}
+            无图片
+          {% endif %}
+        </td>
+        <td>{{ p.category.name }}</td>
+        <td>￥{{ p.price }}</td>
+        <td>{{ p.stock }}</td>
+        <td>{{ p.created_at|date:"Y-m-d" }}</td>
+        <td>
+          <button class="btn btn-primary btn-sm edit-btn" data-id="{{ p.id }}">编辑</button>
+          <button class="btn btn-sm btn-info detail-btn" data-id="{{ p.id }}">🔍 详情</button>
+          <button class="btn btn-sm btn-danger delete-btn">🗑 删除</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 
-<!-- 编辑产品的模态框 -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+<!-- ---------------- 添加产品模态框 ---------------- -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">编辑产品</h5>
+        <h5 class="modal-title">添加新产品</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form id="addProductForm" enctype="multipart/form-data">
           {% csrf_token %}
-          <input type="hidden" name="productId" id="editProductId">
-
           <div class="mb-3">
-            <label class="form-label">产品名称</label>
-            <input type="text" class="form-control" name="name" id="editProductName" required>
+            <label class="form-label">名称</label>
+            <input type="text" class="form-control" name="name" required>
           </div>
-
           <div class="mb-3">
             <label class="form-label">价格</label>
-            <input type="number" step="0.01" class="form-control" name="price" id="editProductPrice" required>
+            <input type="number" step="0.01" class="form-control" name="price" required>
           </div>
-
           <div class="mb-3">
             <label class="form-label">库存</label>
-            <input type="text" class="form-control" name="stock" id="editProductStock" required>
+            <input type="number" class="form-control" name="stock" required>
           </div>
           <div class="mb-3">
-              <label class="form-label">上传图片</label>
-              <input type="file" class="form-control" name="image" accept="image/*">
+            <label class="form-label">描述</label>
+            <textarea class="form-control" name="description" rows="2"></textarea>
           </div>
-
           <div class="mb-3">
-            <label class="form-label">修改原因</label>
-            <select class="form-select" id="action_choice" name="action_choice" required>
-            <option value="update">修改商品信息</option>
-            <option value="stock_in">进货入库</option>
-            <option value="stock_out">售出出库</option>
+            <label class="form-label">类别</label>
+            <select class="form-select" name="category" required>
+              {% for c in categories %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
             </select>
           </div>
+          <div class="mb-3">
+            <label class="form-label">图片</label>
+            <input type="file" class="form-control" name="image" accept="image/*">
+          </div>
+          <button type="submit" class="btn btn-success w-100">提交</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- ---------------- 编辑产品模态框 ---------------- -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">编辑产品信息</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editProductForm" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" id="editProductId">
+
+          <div class="mb-3">
+            <label class="form-label">名称</label>
+            <input type="text" class="form-control" id="editProductName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">价格</label>
+            <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">库存</label>
+            <input type="number" class="form-control" id="editProductStock" name="stock" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">修改原因</label>
+            <select class="form-select" name="action_choice" required>
+              <option value="update">修改商品信息</option>
+              <option value="stock_in">进货入库</option>
+              <option value="stock_out">售出出库</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">图片（可选）</label>
+            <input type="file" class="form-control" name="image" accept="image/*">
+          </div>
           <button type="submit" class="btn btn-primary w-100">保存修改</button>
         </form>
       </div>
@@ -157,142 +175,106 @@
   </div>
 </div>
 
-
-
-<!-- jQuery -->
+<!-- JS -->
 <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
-<!-- DataTables JS -->
-<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'plugins/DataTable/js/dataTables.bootstrap5.min.js' %}"></script>
-<!-- Bootstrap JS -->
 <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
+<script src="{% static 'plugins/DataTable/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    // 初始化 DataTable
-    $('#productTable').DataTable({
-        "pageLength": 5,   // 每页显示 5 条
-        "lengthMenu": [5, 10, 20],
-        "language": {
-            "search": "搜索产品:",
-            "lengthMenu": "显示 _MENU_ 条记录",
-            "info": "显示第 _START_ 到 _END_ 条记录，共 _TOTAL_ 条",
-            "paginate": {
-                "first": "首页",
-                "last": "末页",
-                "next": "下一页",
-                "previous": "上一页"
-            }
-        }
-    });
-
-    $('#productTable').on('click', '.info-btn', function() {
-    const productId = $(this).data('id');
-    if (productId) {
-        window.location.href = "/products/detail/?productId=" + encodeURIComponent(productId);
-    } else {
-        alert("未获取到产品 ID");
+  // DataTables 初始化
+  $('#productTable').DataTable({
+    "pageLength": 10,
+    "language": {
+      "search": "🔍 搜索:",
+      "lengthMenu": "每页显示 _MENU_ 条",
+      "info": "第 _START_ 到 _END_ 条，共 _TOTAL_ 条",
+      "paginate": {"first": "首页", "last": "末页", "next": "下一页", "previous": "上一页"}
     }
-    });
+  });
 
-
-    $('#addProductForm').submit(function (e) {
+  // ---------------- 添加产品 ----------------
+  $('#addProductForm').submit(function(e){
     e.preventDefault();
-
-    const formData = new FormData(this);  // ✅ 用 FormData 包装整个表单
-
+    const formData = new FormData(this);
     $.ajax({
-        url: "{% url 'products:add_product' %}",
-        type: "POST",
-        data: formData,
-        processData: false,  // ✅ 告诉 jQuery 不处理数据
-        contentType: false,  // ✅ 告诉 jQuery 不设置内容类型
-        success: function (data) {
-            if (data.success) {
-                alert("产品添加成功！");
-                location.reload();
-            } else {
-                alert("添加失败：" + data.error);
-            }
-        },
-        error: function (xhr) {
-            alert("请求失败：" + xhr.statusText);
+      url: "{% url 'products:add_product' %}",
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(data){
+        if(data.success){
+          alert("✅ 产品添加成功！");
+          location.reload();
+        } else {
+          alert("❌ 添加失败：" + data.error);
         }
+      }
     });
+  });
 
-    });
+  // ---------------- 编辑产品 ----------------
+  $('#productTable').on('click', '.edit-btn', function(){
+    const row = $(this).closest('tr');
+    $('#editProductId').val(row.find('td:eq(0)').text());
+    $('#editProductName').val(row.find('td:eq(1)').text());
+    $('#editProductPrice').val(row.find('td:eq(4)').text().replace('￥', ''));
+    $('#editProductStock').val(row.find('td:eq(5)').text());
+    $('#editProductModal').modal('show');
+  });
 
-
-    $('#productTable').on('click', '.edit-btn', function () {
-        const row = $(this).closest('tr'); // 找到当前这一行
-        const productId = row.find('td:eq(0)').text(); // 取第0列（ID）
-        const productName = row.find('td:eq(1)').text(); // 取第1列（名称）
-        const productPrice = row.find('td:eq(3)').text(); // 取第3列（价格）
-        const produceStock = row.find('td:eq(4)').text();
-        const ProductCategory = row.find('td:eq(2)').text();
-
-
-        // 把数据填入到Modal里的表单
-        $('#editProductId').val(productId);
-        $('#editProductName').val(productName);
-        $('#editProductPrice').val(productPrice);
-        $('#editProductStock').val(produceStock);
-        $('#editProductCategory').val(ProductCategory)
-
-
-
-        // 显示Modal
-        $('#editProductModal').modal('show');
-    });
-
-    $('#editProductForm').submit(function (e) {
-    e.preventDefault();  // 阻止表单默认刷新
-
+  $('#editProductForm').submit(function(e){
+    e.preventDefault();
     const productId = $('#editProductId').val();
-    const formData = new FormData(this); // 封装表单数据（含文件）
-
+    const formData = new FormData(this);
     $.ajax({
-        url: `/products/edit/${productId}/`,
+      url: `/products/edit/${productId}/`,
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(data){
+        if(data.success){
+          alert("✅ 修改成功！");
+          location.reload();
+        } else {
+          alert("❌ 修改失败：" + data.error);
+        }
+      }
+    });
+  });
+
+  // ---------------- 删除产品 ----------------
+  $('#productTable').on('click', '.delete-btn', function(){
+    const row = $(this).closest('tr');
+    const productId = row.find('td:eq(0)').text();
+    const name = row.find('td:eq(1)').text();
+    if(confirm(`确定删除「${name}」吗？`)){
+      $.ajax({
+        url: `/products/delete/${productId}/`,
         type: 'POST',
-        data: formData,
-        processData: false,  // 不转换数据
-        contentType: false,  // 不设定 Content-Type
-        success: function (data) {
-            if (data.success) {
-                alert("修改成功！");
-                location.reload();
-            } else {
-                alert("修改失败：" + data.error);
-            }
-        },
-        error: function (xhr) {
-            alert("请求出错：" + xhr.statusText);
+        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+        success: function(data){
+          if(data.success){
+            alert("🗑 删除成功！");
+            location.reload();
+          } else {
+            alert("❌ 删除失败：" + data.error);
+          }
         }
-    });
-});
+      });
+    }
+  });
 
-
-    $('#productTable').on('click', '.delete-btn', function () {
-        const row = $(this).closest('tr');
-        const productId = row.find('td:eq(0)').text();
-        const productName = row.find('td:eq(1)').text();
-
-        if (confirm("确定要删除产品【" + productName + "】吗？")) {
-            $.post("/products/delete/", {
-                productId: productId,
-                csrfmiddlewaretoken: '{{ csrf_token }}'
-            }, function (data) {
-                if (data.success) {
-                    alert("删除成功！");
-                    row.remove(); // 删除这一行
-                } else {
-                    alert("删除失败：" + data.error);
-                }
-            });
-        }
-    });
-
-
+  // ---------------- 查看详情 ----------------
+  $('#productTable').on('click', '.detail-btn', function(){
+    const id = $(this).data('id');
+    window.location.href = `/products/detail/?productId=${id}`;
+  });
 });
 </script>
 </body>

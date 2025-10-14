@@ -1,101 +1,123 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>操作日志</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}" rel="stylesheet">
-  <!-- DataTables CSS -->
-  <link rel="stylesheet" href="{% static 'plugins/DataTable/css/dataTables.bootstrap5.min.css' %}">
+    <meta charset="UTF-8">
+    <title>产品操作日志</title>
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+    <style>
+        body {
+            background-color: #f9f9f9;
+        }
+        .card {
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .badge {
+            font-size: 0.9rem;
+            padding: 6px 10px;
+        }
+        table td, table th {
+            vertical-align: middle !important;
+        }
+    </style>
 </head>
 <body>
-<div class="container mt-5">
-  <h2 class="mb-4">📜 产品操作日志</h2>
-  <a href="/products/" class="btn btn-info">返回</a>
-  <table id="logTable" class="table table-striped table-bordered">
-    <thead class="table-dark">
-      <tr>
+<div class="container py-5">
+    <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold text-primary mb-0">📜 产品操作日志</h3>
+            <a href="{% url 'products:product_home' %}" class="btn btn-secondary">
+                ← 返回产品管理
+            </a>
+        </div>
 
-        <th>产品</th>
-        <th>操作类型</th>
-        <th>修改前名称</th>
-        <th>修改前价格</th>
-        <th>修改前库存</th>
-        <th>修改后</th>
-        <th>变动数量</th>
-        <th>操作人</th>
-        <th>操作时间</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in logs %}
-      <tr>
+        <table id="logTable" class="table table-striped table-hover table-bordered align-middle text-center">
+            <thead class="table-primary">
+                <tr>
+                    <th>产品</th>
+                    <th>操作类型</th>
+                    <th>修改前</th>
+                    <th>修改后</th>
+                    <th>变动数量</th>
+                    <th>操作人</th>
+                    <th>操作时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.product_name }}</td>
+                    <td>
+                        {% if log.action == "create" %}
+                            <span class="badge bg-success">新增</span>
+                        {% elif log.action == "update" %}
+                            <span class="badge bg-primary">修改</span>
+                        {% elif log.action == "delete" %}
+                            <span class="badge bg-danger">删除</span>
+                        {% elif log.action == "stock_in" %}
+                            <span class="badge bg-danger">购入</span>
+                        {% else %}
+                            <span class="badge bg-danger">售出</span>
+                        {% endif %}
+                    </td>
 
-        <td>{{ entry.product.name }}</td>
-        <td>
-          {% if entry.action == "('update',)" %}
-            <span class="badge bg-primary">修改</span>
-          {% elif entry.action == "('stock_in',)" %}
-            <span class="badge bg-success">入库</span>
-          {% elif entry.action == "('stock_out',)" %}
-            <span class="badge bg-danger">出库</span>
-          {% elif entry.action == "('create',)" %}
-            <span class="badge bg-secondary">添加产品</span>
-          {% else %}
-              <span class="badge bg-dark">删除产品</span>
-          {% endif %}
-        </td>
-        <td>{{ entry.old_value.name }}</td>
-        <td>{{ entry.old_value.price }}</td>
-        <td>{{ entry.old_value.stock }}</td>
+                    <td class="text-start">
+                        {% if log.old_value.items %}
+                            {% for k,v in log.old_value.items %}
+                                <div><strong>{{ k }}</strong>：{{ v }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">无</span>
+                        {% endif %}
+                    </td>
 
-        <td>{{ entry.new_value }}</td>
-        <td>
-          {% if entry.change_amount > 0 %}
-            <span class="text-success">+{{ entry.change_amount }}</span>
-          {% elif entry.change_amount < 0 %}
-            <span class="text-danger">{{ entry.change_amount }}</span>
-          {% else %}
-            {{ entry.change_amount }}
-          {% endif %}
-        </td>
-        <td>{{ entry.admin.username }}</td>
-        <td>{{ entry.created_at|date:"Y-m-d H:i" }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+                    <td class="text-start">
+                        {% if log.new_value.items %}
+                            {% for k,v in log.new_value.items %}
+                                <div><strong>{{ k }}</strong>：{{ v }}</div>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">无</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if log.change_amount > 0 %}
+                            <span class="text-success">+{{ log.change_amount }}</span>
+                        {% elif log.change_amount < 0 %}
+                            <span class="text-danger">{{ log.change_amount }}</span>
+                        {% else %}
+                            <span class="text-muted">0</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ log.admin }}</td>
+                    <td>{{ log.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
-<!-- jQuery -->
+<!-- JS依赖 -->
 <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
-<!-- DataTables JS -->
-<script src="{% static 'js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'plugins/DataTable/js/dataTables.bootstrap5.min.js' %}"></script>
-<!-- Bootstrap JS -->
 <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 $(document).ready(function () {
-  $('#logTable').DataTable({
-    "pageLength": 10,
-    "lengthMenu": [10, 20, 50],
-    "order": [[7, "desc"]], // 默认按时间倒序
-    "language": {
-      "search": "🔍 搜索日志:",
-      "lengthMenu": "每页显示 _MENU_ 条",
-      "info": "第 _START_ 到 _END_ 条，共 _TOTAL_ 条",
-      "paginate": {
-        "first": "首页",
-        "last": "末页",
-        "next": "下一页",
-        "previous": "上一页"
-      }
-    }
-  });
+    $('#logTable').DataTable({
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/zh-CN.json'
+        },
+        pageLength: 10,
+        order: [[6, 'desc']], // 默认按时间倒序
+    });
 });
 </script>
 </body>

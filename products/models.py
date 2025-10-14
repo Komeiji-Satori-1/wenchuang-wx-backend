@@ -1,11 +1,12 @@
 from django.db import models
 from admin_panel.models import AdminUser
-# Create your models here.
+
 class Category(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=50,null=False, blank=False)
-    description = models.TextField(blank=True, null=True)
+    name = models.CharField(max_length=50, null=False, blank=False)
+    description = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         db_table = 'category'
         managed = False
@@ -13,26 +14,29 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
 class Product(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)  # 商品名称
-    description = models.TextField(blank=True, null=True)  # 商品描述
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # 商品价格
-    stock = models.IntegerField(default=0)  # 库存数量
-    image = models.ImageField(upload_to='products/', null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)  # 创建时间
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    stock = models.IntegerField(default=0)
+    image = models.ImageField(upload_to='products/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.CASCADE,
-        related_name="products",  # 反向查询用 category.products.all()
+        related_name="products",
         null=True, blank=True
     )
+
     class Meta:
         db_table = 'product'
         managed = False
 
     def __str__(self):
         return self.name
+
 
 class ProductLog(models.Model):
     ACTION_CHOICES = [
@@ -44,17 +48,17 @@ class ProductLog(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="logs")
-    admin = models.ForeignKey(AdminUser,on_delete=models.SET_NULL, null=True,blank=True, related_name='product_logs')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="logs")
+    admin = models.ForeignKey(AdminUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='product_logs')
     action = models.CharField(max_length=50, choices=ACTION_CHOICES)
-    change_amount = models.IntegerField(default=0)  # 库存变化量
-    old_value = models.JSONField(null=True, blank=True)
-    new_value = models.JSONField(null=True, blank=True)
+    change_amount = models.IntegerField(default=0)
+    old_value = models.TextField(null=True, blank=True)
+    new_value = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "product_log"
-        managed = True
+        managed = False
 
     def __str__(self):
         return f"{self.product.name} - {self.action}"
