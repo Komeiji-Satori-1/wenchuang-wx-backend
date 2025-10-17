@@ -1,0 +1,386 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>订单统计分析</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}">
+    <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
+    <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
+
+    <!-- Chart.js 脚本已移至 </body> 之前，以确保正确加载顺序 -->
+
+    <style>
+        body {
+            background-color: #f7f9fb;
+        }
+        .chart-container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .btn-group {
+            text-align: center;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* 确保在小屏幕上换行 */
+        }
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+        }
+
+        /* 核心：可滚动的图表外层容器 */
+        .chart-scroll-container {
+            width: 100%;
+            overflow-x: auto; /* 允许水平滚动 */
+            overflow-y: hidden;
+            padding-bottom: 8px; /* 为滚动条留出空间 */
+        }
+
+        /* 动态可扩展的canvas容器 */
+        #salesChart {
+            display: block;
+            min-width: 100%; /* 确保在数据少时至少占满容器 */
+            height: 450px !important;  /* 固定较高的显示区域 */
+        }
+
+        /* 新增：饼状图容器样式，确保其在移动端友好 */
+        .pie-chart-wrapper {
+            max-width: 500px; /* 限制饼图的最大宽度，使其居中美观 */
+            margin: 0 auto;
+        }
+
+        /* 美化滚动条 */
+        .chart-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .chart-scroll-container::-webkit-scrollbar-thumb {
+            background: #9ca3af;
+            border-radius: 4px;
+        }
+        .chart-scroll-container::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="mb-4">📊 销售统计分析</h2>
+    <!-- 注意：此处链接可能需要根据您的URL配置调整 -->
+    <a href="{% url 'orders:order_home' %}" class="btn btn-secondary back-btn">查看订单详情</a>
+    <a href="/index/" class="btn btn-secondary">🏠 返回主页</a>
+
+    <!-- 1. 月销售额趋势图 (原图表) -->
+    <div class="chart-container">
+        <div class="chart-title">月销售额趋势</div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group" role="group" aria-label="Time Range Controls">
+            <button class="btn btn-outline-primary btn-sm" onclick="updateRange(6)">最近6个月</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="updateRange(12)">最近12个月</button>
+            <button class="btn btn-outline-primary btn-sm" onclick="updateRange('all')">全部</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="resetZoom()">重置缩放</button>
+        </div>
+
+        <!-- 滚动容器 -->
+        <div class="chart-scroll-container">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 2. 产品销售量分布图 (新增饼状图) -->
+    <div class="chart-container mt-5">
+        <div class="chart-title">🏆 热门产品销量分布 (Top 5)</div>
+
+        <!-- 按钮组 -->
+        <div class="btn-group" role="group" aria-label="Product Time Range Controls">
+            <button class="btn btn-outline-success btn-sm" onclick="updateProductRange('all')">全部时间</button>
+            <button class="btn btn-outline-success btn-sm" onclick="updateProductRange(12)">最近12个月</button>
+            <button class="btn btn-outline-success btn-sm" onclick="updateProductRange(3)">最近3个月</button>
+        </div>
+
+        <!-- 饼状图容器 -->
+        <div class="pie-chart-wrapper">
+            <canvas id="productSalesChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- 引入 Chart.js 与 缩放插件 (移动到这里确保它们在主脚本运行前已加载) -->
+<script src="{% static 'js/chart.js' %}"></script>
+<script src="{% static 'js/chartjs-plugin-zoom.min.js' %}"></script>
+
+<script>
+    // ----------------------------------------------------
+    // I. 销售额趋势图 (Sales Chart) 逻辑
+    // ----------------------------------------------------
+    let salesChart = null;
+    const allLabels = JSON.parse('{{ sales_labels_json | safe }}');
+    const allData = JSON.parse('{{ sales_data_json | safe }}')
+
+    function getData(range) {
+        if (range === 'all') {
+            return { labels: allLabels, data: allData };
+        }
+        const count = parseInt(range);
+        return {
+            labels: allLabels.slice(-count),
+            data: allData.slice(-count)
+        };
+    }
+
+    function calculateCanvasWidth(labelCount) {
+        const minWidth = 600;
+        const dynamicWidth = Math.max(minWidth, labelCount * 80 + 100);
+        return dynamicWidth;
+    }
+
+    function updateRange(range) {
+        const { labels, data } = getData(range);
+        const canvas = document.getElementById("salesChart");
+        canvas.style.width = calculateCanvasWidth(labels.length) + 'px';
+
+        if (salesChart) {
+            salesChart.data.labels = labels;
+            salesChart.data.datasets[0].data = data;
+            salesChart.update('none');
+            salesChart.resetZoom();
+        }
+    }
+
+    function resetZoom() {
+        if (salesChart) {
+            salesChart.resetZoom();
+        }
+    }
+
+    // ----------------------------------------------------
+    // II. 产品销售量图 (Product Chart) 逻辑
+    // ----------------------------------------------------
+    let productSalesChart = null;
+    // 模拟数据: 包含所有月份的产品销售量 (按产品名称索引顺序)
+    const allProductSalesData = JSON.parse('{{ product_detail_json | safe }}');
+
+    /**
+     * 根据时间范围计算 Top 5 产品销售量
+     * @param {number|string} range - 要计算的月数 (3, 12) 或 'all'
+     * @returns {object} { labels: Array<string>, data: Array<number> }
+     */
+    function getTopProductSales(range) {
+        let dataSlice;
+
+        if (range === 'all') {
+            dataSlice = allProductSalesData;
+        } else {
+            const count = parseInt(range);
+            dataSlice = allProductSalesData.slice(-count);
+        }
+
+        // 1. 初始化产品总销量数组
+        const totalQuantities = Array(allProductSalesData.length).fill(0);
+
+        // 2. 聚合数据: 累加每个产品的总销量
+        dataSlice.forEach(monthData => {
+            monthData.qty.forEach((q, index) => {
+                totalQuantities[index] += q;
+            });
+        });
+
+        // 3. 将销量和名称组合成对象数组
+        const productData = allProductSalesData.map((name, index) => ({
+            name: name,
+            quantity: totalQuantities[index]
+        }));
+
+        // 4. 排序并获取 Top 5
+        productData.sort((a, b) => b.quantity - a.quantity);
+
+        const topProducts = productData.slice(0, 5);
+        const remainingProducts = productData.slice(5);
+
+        let otherQuantity = 0;
+        remainingProducts.forEach(p => {
+            otherQuantity += p.quantity;
+        });
+
+        // 5. 构建最终用于图表的数据
+        const chartLabels = topProducts.map(p => p.name);
+        const chartData = topProducts.map(p => p.quantity);
+
+        // 6. 如果有剩余产品，则添加“其他”
+        if (otherQuantity > 0) {
+            chartLabels.push("其他产品");
+            chartData.push(otherQuantity);
+        }
+
+        return { labels: chartLabels, data: chartData };
+    }
+
+
+    const backgroundColors = [
+        'rgba(255, 99, 132, 0.8)', // 红色 (Top 1)
+        'rgba(54, 162, 235, 0.8)',  // 蓝色 (Top 2)
+        'rgba(255, 206, 86, 0.8)', // 黄色 (Top 3)
+        'rgba(75, 192, 192, 0.8)', // 绿色 (Top 4)
+        'rgba(153, 102, 255, 0.8)',// 紫色 (Top 5)
+        'rgba(201, 203, 207, 0.8)' // 灰色 (其他)
+    ];
+
+    /**
+     * 更新产品饼状图的数据和范围
+     * @param {number|string} range
+     */
+    function updateProductRange(range) {
+        const { labels, data } = getTopProductSales(range);
+
+        if (productSalesChart) {
+            productSalesChart.data.labels = labels;
+            productSalesChart.data.datasets[0].data = data;
+            productSalesChart.data.datasets[0].backgroundColor = backgroundColors.slice(0, labels.length);
+            productSalesChart.update('none');
+        }
+    }
+
+
+    // ----------------------------------------------------
+    // III. 初始化函数
+    // ----------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        // --- 1. 初始化 销售额趋势图 ---
+        const ctxSales = document.getElementById('salesChart').getContext('2d');
+        const defaultSalesRange = 6;
+        const { labels: salesLabels, data: salesData } = getData(defaultSalesRange);
+        const salesCanvas = document.getElementById("salesChart");
+
+        salesCanvas.style.width = calculateCanvasWidth(salesLabels.length) + 'px';
+
+        salesChart = new Chart(ctxSales, {
+            type: "bar",
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: "销售额 (¥)",
+                    data: salesData,
+                    backgroundColor: "rgba(54, 162, 235, 0.7)",
+                    hoverBackgroundColor: "rgba(54, 162, 235, 1)",
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: "rgba(54, 162, 235, 1)"
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "top" },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(context.parsed.y);
+                                }
+                                return label;
+                            }
+                        }
+                    },
+                    zoom: {
+                        zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x', },
+                        pan: { enabled: true, mode: 'x', modifierKey: 'alt', }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: '销售额 (¥)' },
+                        ticks: {
+                             callback: function(value, index, values) {
+                                 return '¥' + value.toLocaleString('zh-CN');
+                             }
+                         }
+                    },
+                    x: {
+                        title: { display: true, text: '月份' },
+                        ticks: { color: "#555" }
+                    }
+                }
+            }
+        });
+
+        // 首次加载后，将滚动条移动到最右边（最新数据）
+        const scrollContainer = document.querySelector('.chart-scroll-container');
+        if (scrollContainer) {
+            setTimeout(() => {
+                scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+            }, 100);
+        }
+
+        // --- 2. 初始化 产品销售量分布图 ---
+        const ctxProduct = document.getElementById('productSalesChart').getContext('2d');
+        const defaultProductRange = 'all'; // 默认展示全部时间
+        const { labels: productLabels, data: productData } = getTopProductSales(defaultProductRange);
+
+        productSalesChart = new Chart(ctxProduct, {
+            type: "pie",
+            data: {
+                labels: productLabels,
+                datasets: [{
+                    data: productData,
+                    backgroundColor: backgroundColors.slice(0, productLabels.length),
+                    hoverOffset: 15,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right', // 饼图图例放在右侧
+                        labels: {
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            // 自定义提示框内容，显示百分比
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+
+                                const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                                const value = context.parsed;
+                                const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                label += `${value.toLocaleString('zh-CN')} 件 (${percentage})`;
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

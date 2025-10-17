@@ -22,6 +22,30 @@
         table td, table th {
             vertical-align: middle !important;
         }
+        /* ========== 日志页面专用样式 ========== */
+        .log-table td {
+            text-align: left;
+            padding: 10px;
+        }
+        .log-table th{
+            text-align: left;
+            padding: 10px;
+        }
+        .log-action {
+            font-weight: bold;
+            color: #2563eb;
+        }
+        .log-diff {
+            font-size: 14px;
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+        .log-time {
+            font-size: 13px;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
@@ -34,7 +58,7 @@
             </a>
         </div>
 
-        <table id="logTable" class="table table-striped table-hover table-bordered align-middle text-center">
+        <table id="logTable" class="table log-table table-striped table-hover table-bordered align-middle text-center">
             <thead class="table-primary">
                 <tr>
                     <th>产品</th>
@@ -64,7 +88,7 @@
                         {% endif %}
                     </td>
 
-                    <td class="text-start">
+                    <td class="text-start log-diff">
                         {% if log.old_value.items %}
                             {% for k,v in log.old_value.items %}
                                 <div><strong>{{ k }}</strong>：{{ v }}</div>
@@ -74,7 +98,7 @@
                         {% endif %}
                     </td>
 
-                    <td class="text-start">
+                    <td class="text-start log-diff">
                         {% if log.new_value.items %}
                             {% for k,v in log.new_value.items %}
                                 <div><strong>{{ k }}</strong>：{{ v }}</div>
@@ -95,7 +119,7 @@
                     </td>
 
                     <td>{{ log.admin }}</td>
-                    <td>{{ log.created_at }}</td>
+                    <td class="log-time">{{ log.created_at }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

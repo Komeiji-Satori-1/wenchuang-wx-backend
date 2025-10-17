@@ -48,7 +48,7 @@ class ProductLog(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="logs")
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True,related_name="logs")
     admin = models.ForeignKey(AdminUser, on_delete=models.SET_NULL, null=True, blank=True, related_name='product_logs')
     action = models.CharField(max_length=50, choices=ACTION_CHOICES)
     change_amount = models.IntegerField(default=0)
@@ -58,7 +58,7 @@ class ProductLog(models.Model):
 
     class Meta:
         db_table = "product_log"
-        managed = False
+        managed = True
 
     def __str__(self):
         return f"{self.product.name} - {self.action}"

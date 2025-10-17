@@ -128,13 +128,14 @@ def delete_product(request, product_id):
             "price": str(product.price),
             "stock": product.stock,
         }
+        new_data = {"status": "已删除"}
 
         # ✅ 删除前记录日志，防止外键约束报错
         ProductLog.objects.create(
             product=product,
             action="delete",
-            old_value=old_data,
-            new_value={"status": "已删除"},
+            old_value=json.dumps(old_data, ensure_ascii=False),
+            new_value=json.dumps(new_data, ensure_ascii=False),
             change_amount=0,
             admin_id=request.session.get('admin_user_id'),
         )
