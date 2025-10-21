@@ -39,17 +39,17 @@ class OrderItems(models.Model):
         return f"{self.product.name} x {self.quantity} (¥{self.price})"
 
 class Payment(models.Model):
-    PAYMENT_METHODS = [
+    STATUS_CHOICES = [
         ('wechat', '微信支付'),
         ('alipay', '支付宝'),
         ('card', '银行卡'),
     ]
 
     order = models.ForeignKey(Orders, related_name='payments', on_delete=models.CASCADE)
-    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHODS)
+    payment_method = models.CharField(max_length=50, choices=STATUS_CHOICES)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, default='unpaid')
-    transaction_id = models.CharField(max_length=100, null=True, blank=True)
+    transaction_id = models.CharField(max_length=100, null=True, unique=True,blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:

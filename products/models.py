@@ -58,7 +58,7 @@ class ProductLog(models.Model):
 
     class Meta:
         db_table = "product_log"
-        managed = True
+        managed = False
 
     def __str__(self):
         return f"{self.product.name} - {self.action}"

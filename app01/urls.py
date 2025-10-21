@@ -21,10 +21,12 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
-    path('', include('admin_panel.urls')),
+    path('', include(('admin_panel.urls', 'admin_panel'), namespace='admin_panel'),),
     path('products/', include(('products.urls', 'products'), namespace='products')),
     path('orders/', include(('orders.urls', 'orders'), namespace='orders')),
     path('accounts/', include(('users.urls', 'users'), namespace='users')),
+
+    path('api/users/', include(('users.urls','users'),'api_users')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
