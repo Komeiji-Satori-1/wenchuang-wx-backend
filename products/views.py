@@ -4,6 +4,13 @@ from admin_panel.decorators import admin_login_required
 from .models import Product, Category, ProductLog,AdminUser
 from django.views.decorators.csrf import csrf_exempt
 import json
+import requests
+from .serializers import ProductSerializer
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User as AuthUser
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 
 
 # ------------------ 产品主页 ------------------
@@ -175,3 +182,11 @@ def product_log(request):
         })
 
     return render(request, "product_log.html", {"logs": formatted_logs})
+
+
+
+class ProductListView(APIView):
+    def get(self, request):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)

@@ -1,0 +1,57 @@
+# === Python 基础 ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+
+# === 虚拟环境 ===
+venv/
+env/
+.venv/
+
+# === Django 文件 ===
+db.sqlite3
+*.log
+media/
+staticfiles/
+.env
+*.env
+appid.env
+secret_key.txt
+
+# === IDE 文件 ===
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# === 系统文件 ===
+.DS_Store
+Thumbs.db
+
+# === 缓存和临时文件 ===
+*.tmp
+*.bak
+*.cache
+*.log
+
+# === Node / 前端相关 (如果有小程序或静态资源构建) ===
+node_modules/
+dist/
+build/
+npm-debug.log
+yarn-error.log
+
+# === 测试文件 ===
+coverage/
+*.cover
+test_*.py
+tests/
+
+# === 安全排除 ===
+*.pem
+*.crt
+*.key
+*.p12

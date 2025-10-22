@@ -27,6 +27,9 @@ urlpatterns = [
     path('accounts/', include(('users.urls', 'users'), namespace='users')),
 
     path('api/users/', include(('users.urls','users'),'api_users')),
+
+    path('api/products/', include(('products.urls','products'),'api_products')),
+    path('api/orders/', include(('orders.urls','orders'),'api_orders')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

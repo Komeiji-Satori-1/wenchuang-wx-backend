@@ -2,6 +2,8 @@ import json
 from django.shortcuts import render
 from django.db.models import Sum, F
 from django.db.models.functions import TruncMonth
+from rest_framework.views import APIView
+
 # 假设 Orders, OrderItems 和 Product 都在当前应用的 models.py 中
 from .models import Orders, OrderItems, Product
 from decimal import Decimal
@@ -94,3 +96,4 @@ def order_analysis_home(request):
 
     # 3. 渲染模板
     return render(request, 'order_home.html', context)
+

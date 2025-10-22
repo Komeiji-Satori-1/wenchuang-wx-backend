@@ -10,4 +10,5 @@ urlpatterns = [
     path('detail/', views.product_detail, name='product_detail'),
     path('log/', views.product_log, name='product_log'),
     path('get_product/<int:product_id>', views.product_search, name='product_search'),
+    path('wechat_get_product/', views.ProductListView.as_view(), name='wechat_get_product_api'),
 ]

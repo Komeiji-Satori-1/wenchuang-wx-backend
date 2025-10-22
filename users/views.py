@@ -11,8 +11,10 @@ from admin_panel.models import AdminUser
 from .serializers import UserSerializer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User as AuthUser
+from admin_panel.decorators import admin_login_required
 
 
+@admin_login_required
 def user_admin_home(request):
     """用户 & 管理员主页"""
     return render(request, 'user_admin_list.html')
