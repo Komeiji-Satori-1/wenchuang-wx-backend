@@ -83,7 +83,7 @@
 <div class="container mt-5">
     <h2 class="mb-4">📊 销售统计分析</h2>
     <!-- 注意：此处链接可能需要根据您的URL配置调整 -->
-    <a href="{% url 'orders:order_home' %}" class="btn btn-secondary back-btn">查看订单详情</a>
+    <a href="{% url 'orders:order_list' %}" class="btn btn-secondary back-btn">查看订单详情</a>
     <a href="/index/" class="btn btn-secondary">🏠 返回主页</a>
 
     <!-- 1. 月销售额趋势图 (原图表) -->
@@ -184,54 +184,51 @@
      * @returns {object} { labels: Array<string>, data: Array<number> }
      */
     function getTopProductSales(range) {
-        let dataSlice;
+    let dataSlice;
 
-        if (range === 'all') {
-            dataSlice = allProductSalesData;
-        } else {
-            const count = parseInt(range);
-            dataSlice = allProductSalesData.slice(-count);
-        }
-
-        // 1. 初始化产品总销量数组
-        const totalQuantities = Array(allProductSalesData.length).fill(0);
-
-        // 2. 聚合数据: 累加每个产品的总销量
-        dataSlice.forEach(monthData => {
-            monthData.qty.forEach((q, index) => {
-                totalQuantities[index] += q;
-            });
-        });
-
-        // 3. 将销量和名称组合成对象数组
-        const productData = allProductSalesData.map((name, index) => ({
-            name: name,
-            quantity: totalQuantities[index]
-        }));
-
-        // 4. 排序并获取 Top 5
-        productData.sort((a, b) => b.quantity - a.quantity);
-
-        const topProducts = productData.slice(0, 5);
-        const remainingProducts = productData.slice(5);
-
-        let otherQuantity = 0;
-        remainingProducts.forEach(p => {
-            otherQuantity += p.quantity;
-        });
-
-        // 5. 构建最终用于图表的数据
-        const chartLabels = topProducts.map(p => p.name);
-        const chartData = topProducts.map(p => p.quantity);
-
-        // 6. 如果有剩余产品，则添加“其他”
-        if (otherQuantity > 0) {
-            chartLabels.push("其他产品");
-            chartData.push(otherQuantity);
-        }
-
-        return { labels: chartLabels, data: chartData };
+    if (range === 'all') {
+        dataSlice = allProductSalesData;
+    } else {
+        const count = parseInt(range);
+        dataSlice = allProductSalesData.slice(-count);
     }
+
+    // 1️⃣ 重新聚合数据（基于 product_name）
+    const productTotals = {};
+
+    dataSlice.forEach(item => {
+        const name = item.product_name || '未知产品';
+        const qty = item.quantity || 0;
+        if (!productTotals[name]) {
+            productTotals[name] = 0;
+        }
+        productTotals[name] += qty;
+    });
+
+    // 2️⃣ 排序并获取 Top 5
+    const productData = Object.entries(productTotals)
+        .map(([name, quantity]) => ({ name, quantity }))
+        .sort((a, b) => b.quantity - a.quantity);
+
+    const topProducts = productData.slice(0, 5);
+    const remainingProducts = productData.slice(5);
+
+    let otherQuantity = 0;
+    remainingProducts.forEach(p => {
+        otherQuantity += p.quantity;
+    });
+
+    const chartLabels = topProducts.map(p => p.name);
+    const chartData = topProducts.map(p => p.quantity);
+
+    if (otherQuantity > 0) {
+        chartLabels.push("其他产品");
+        chartData.push(otherQuantity);
+    }
+
+    return { labels: chartLabels, data: chartData };
+}
+
 
 
     const backgroundColors = [
