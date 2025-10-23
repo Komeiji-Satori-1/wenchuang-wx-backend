@@ -18,8 +18,8 @@ class Orders(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'orders'  # 对应 MySQL 表名
-        managed = False           # Django 不管理该表（表已存在）
+        db_table = 'orders'
+        managed = False
 
     def __str__(self):
         return f"订单 {self.id} - 用户 {self.user.openid}:{self.user.nickname} - 金额 {self.total_amount}"

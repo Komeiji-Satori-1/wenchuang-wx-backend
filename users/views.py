@@ -16,12 +16,12 @@ from admin_panel.decorators import admin_login_required
 
 @admin_login_required
 def user_admin_home(request):
-    """用户 & 管理员主页"""
+
     return render(request, 'user_admin_list.html')
 
 
 def user_list(request):
-    """普通用户分页数据"""
+
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
     users = User.objects.all().order_by('id')
@@ -46,7 +46,7 @@ def user_list(request):
 
 
 def admin_list(request):
-    """管理员分页数据"""
+
     page = int(request.GET.get('page', 1))
     per_page = int(request.GET.get('per_page', 20))
     admins = AdminUser.objects.all().order_by('-created_at')
@@ -87,13 +87,13 @@ class WeChatLoginView(APIView):
         except Exception as e:
             return Response({'error':'微信接口调用失败'},status.HTTP_400_BAD_REQUEST)
         if 'openid' not in data:
-            # ✅ 测试阶段启用假数据
+
             fake_openid = f"test_openid_{code}"
             fake_session_key = "fake_session_key"
             openid = fake_openid
             session_key = fake_session_key
         else:
-            # ✅ 真实环境下使用微信返回的数据
+
             openid = data['openid']
             session_key = data.get('session_key', '')
 

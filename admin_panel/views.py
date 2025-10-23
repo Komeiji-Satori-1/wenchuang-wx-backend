@@ -41,8 +41,7 @@ def verification(request):
     return HttpResponse("null")
 
 def logout_view(request):
-    # 清除所有 session 数据
+
     request.session.flush()
-    # 可选：给出提示
-    # messages.success(request, "您已退出登录")  # 如果用 messages 框架的话
-    return redirect('/login/')  # 重定向回登录页
+
+    return redirect('/login/')

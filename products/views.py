@@ -11,9 +11,6 @@ from django.contrib.auth.models import User as AuthUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
-
-# ------------------ 产品主页 ------------------
 @admin_login_required
 def product_home(request):
     products = Product.objects.all()
@@ -26,7 +23,7 @@ def product_search(request):
     return render(request, 'product_home.html', {'products': products, 'categories': categories})
 
 
-# ------------------ 添加产品 ------------------
+
 @csrf_exempt
 def add_product(request):
     if request.method == "POST":
@@ -69,7 +66,7 @@ def add_product(request):
     return JsonResponse({"success": False, "error": "无效请求"})
 
 
-# ------------------ 产品详情 ------------------
+
 @admin_login_required
 def product_detail(request):
     product_id = request.GET.get("productId")
@@ -77,7 +74,7 @@ def product_detail(request):
     return render(request, 'product_detail.html', {'product': product})
 
 
-# ------------------ 编辑产品 ------------------
+
 @csrf_exempt
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -137,7 +134,6 @@ def delete_product(request, product_id):
         }
         new_data = {"status": "已删除"}
 
-        # ✅ 删除前记录日志，防止外键约束报错
         ProductLog.objects.create(
             product=product,
             action="delete",
@@ -160,7 +156,7 @@ def product_log(request):
 
     formatted_logs = []
     for entry in logs:
-        # 尝试将 JSON 字符串转换为字典，避免模板里显示原始 JSON 文本
+
         try:
             old_val = json.loads(entry.old_value) if entry.old_value else {}
         except json.JSONDecodeError:

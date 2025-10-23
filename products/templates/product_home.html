@@ -6,14 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>产品管理后台</title>
 
-  <!-- Bootstrap -->
   <link href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}" rel="stylesheet">
-  <!-- DataTables -->
   <link href="{% static 'plugins/DataTable/css/dataTables.bootstrap5.min.css' %}" rel="stylesheet">
   <style>
-          /* ========== 全局基础样式 ========== */
     body {
-        background-color: #f7f9fc; /* 柔和浅灰背景 */
+        background-color: #f7f9fc;
         font-family: "Microsoft YaHei", Arial, sans-serif;
         color: #333;
         margin: 0;
@@ -22,7 +19,6 @@
     th:first-child, td:first-child {
     display: none;
     }
-    /* 页面标题区域 */
     .page-title {
         font-size: 28px;
         font-weight: 600;
@@ -31,7 +27,6 @@
         text-align: center;
     }
 
-    /* 通用卡片容器 */
     .card-container {
         background: white;
         border-radius: 16px;
@@ -44,7 +39,7 @@
         transform: translateY(-3px);
     }
 
-    /* ========== 按钮部分 ========== */
+
     .btn {
         border-radius: 8px;
         padding: 6px 14px;
@@ -52,7 +47,7 @@
         transition: all 0.2s ease;
     }
 
-    /* 添加产品按钮（绿色） */
+
     .btn-add {
         background-color: #22c55e;
         color: white;
@@ -61,7 +56,7 @@
         background-color: #16a34a;
     }
 
-    /* 编辑按钮（蓝色） */
+
     .btn-edit {
         background-color: #3b82f6;
         color: white;
@@ -70,7 +65,7 @@
         background-color: #2563eb;
     }
 
-    /* 查看详情按钮（浅蓝） */
+
     .btn-info {
         background-color: #60a5fa;
         color: white;
@@ -79,7 +74,7 @@
         background-color: #3b82f6;
     }
 
-    /* 删除按钮（红色） */
+
     .btn-delete {
         background-color: #ef4444;
         color: white;
@@ -88,7 +83,7 @@
         background-color: #dc2626;
     }
 
-    /* 返回主页、查看日志等功能按钮 */
+
     .btn-secondary {
         background-color: #e2e8f0;
         color: #1e293b;
@@ -97,14 +92,14 @@
         background-color: #cbd5e1;
     }
 
-    /* ========== 表格样式 ========== */
+
     .product-table {
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
     }
 
-    /* 表头 */
+
     .product-table thead {
         background-color: #f1f5f9;
     }
@@ -115,19 +110,19 @@
         text-align: center;
     }
 
-    /* 表格内容 */
+
     .product-table td {
         padding: 12px 10px;
         text-align: center;
         vertical-align: middle;
     }
 
-    /* 表格行悬停 */
+
     .product-table tbody tr:hover {
         background-color: #f8fafc;
     }
 
-    /* 产品图片样式 */
+
     .product-img {
         width: 60px;
         height: 60px;
@@ -136,7 +131,6 @@
         box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
 
-    /* ========== 上传图片区域 ========== */
     .upload-section {
         border: 2px dashed #d1d5db;
         border-radius: 12px;
@@ -151,13 +145,11 @@
         border-color: #6366f1;
     }
 
-    /* 上传区域内的图标或文字 */
     .upload-section p {
         color: #64748b;
         margin-top: 10px;
     }
 
-    /* 图片预览 */
     .image-preview {
         margin-top: 15px;
         display: flex;
@@ -171,12 +163,10 @@
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    /* ========== DataTables 分页样式 ========== */
     .dataTables_wrapper .dataTables_paginate {
         margin-top: 15px;
     }
 
-    /* 普通分页按钮 */
     .dataTables_wrapper .dataTables_paginate .paginate_button {
         color: #374151 !important;
         border-radius: 6px !important;
@@ -184,13 +174,11 @@
         transition: all 0.2s ease-in-out;
     }
 
-    /* 悬停效果 */
     .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
         background-color: #6366f1 !important;
         color: white !important;
     }
 
-    /* 当前页按钮 */
     .dataTables_wrapper .dataTables_paginate .paginate_button.current {
         background-color: #4f46e5 !important;
         color: white !important;
@@ -198,7 +186,6 @@
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
-    /* 禁用状态 */
     .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
         color: #aaa !important;
         background: transparent !important;
@@ -216,10 +203,8 @@
     </div>
   </div>
 
-  <!-- 添加按钮 -->
   <button class="btn btn-success mb-3 btn-add" data-bs-toggle="modal" data-bs-target="#addProductModal">➕ 添加产品</button>
 
-  <!-- 产品表格 -->
   <table id="productTable" class="table table-striped table-bordered align-middle">
     <thead class="table-dark">
       <tr>
@@ -260,7 +245,6 @@
   </table>
 </div>
 
-<!-- ---------------- 添加产品模态框 ---------------- -->
 <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -306,7 +290,6 @@
   </div>
 </div>
 
-<!-- ---------------- 编辑产品模态框 ---------------- -->
 <div class="modal fade" id="editProductModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -360,7 +343,6 @@
 
 <script>
 $(document).ready(function() {
-  // DataTables 初始化
   $('#productTable').DataTable({
     "pageLength": 10,
     "language": {
@@ -371,7 +353,6 @@ $(document).ready(function() {
     }
   });
 
-  // ---------------- 添加产品 ----------------
   $('#addProductForm').submit(function(e){
     e.preventDefault();
     const formData = new FormData(this);
@@ -392,7 +373,6 @@ $(document).ready(function() {
     });
   });
 
-  // ---------------- 编辑产品 ----------------
   $('#productTable').on('click', '.btn-edit', function(){
     const row = $(this).closest('tr');
     $('#editProductId').val(row.find('td:eq(0)').text());
@@ -423,7 +403,6 @@ $(document).ready(function() {
     });
   });
 
-  // ---------------- 删除产品 ----------------
   $('#productTable').on('click', '.btn-delete', function(){
     const row = $(this).closest('tr');
     const productId = row.find('td:eq(0)').text();
@@ -445,7 +424,6 @@ $(document).ready(function() {
     }
   });
 
-  // ---------------- 查看详情 ----------------
   $('#productTable').on('click', '.detail-btn', function(){
     const id = $(this).data('id');
     window.location.href = `/products/detail/?productId=${id}`;

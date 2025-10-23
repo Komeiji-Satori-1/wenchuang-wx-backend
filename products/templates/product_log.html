@@ -22,7 +22,6 @@
         table td, table th {
             vertical-align: middle !important;
         }
-        /* ========== 日志页面专用样式 ========== */
         .log-table td {
             text-align: left;
             padding: 10px;
@@ -127,7 +126,7 @@
     </div>
 </div>
 
-<!-- JS依赖 -->
+
 <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
 <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
@@ -140,7 +139,7 @@ $(document).ready(function () {
             url: 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/zh-CN.json'
         },
         pageLength: 10,
-        order: [[6, 'desc']], // 默认按时间倒序
+        order: [[6, 'desc']],
     });
 });
 </script>

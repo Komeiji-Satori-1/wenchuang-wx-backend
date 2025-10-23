@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>后台管理登录</title>
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'plugins/bootstrap-5.3.8-dist/css/bootstrap.css' %}">
     <style>
         body {
@@ -40,21 +39,18 @@
             <button type="submit" class="btn btn-primary w-100">登录</button>
         </form>
     </div>
-
-    <!-- jQuery -->
     <script src="{% static 'js/jquery-3.7.1.js' %}"></script>
-    <!-- Bootstrap JS -->
     <script src="{% static 'plugins/bootstrap-5.3.8-dist/js/bootstrap.js' %}"></script>
 
     <script>
         $(document).ready(function(){
             $("#loginForm").submit(function(e){
-                e.preventDefault(); // 阻止表单默认跳转
+                e.preventDefault();
 
                 let username = $("#username").val();
                 let password = $("#password").val();
 
-                $.post("verification/",  // Django 后端处理登录的接口
+                $.post("verification/",
                 {
                     username: username,
                     password: password,
@@ -62,7 +58,6 @@
                 },
                 function(data){
                     if (data.success) {
-                        // 登录成功，跳转到首页
                         window.location.href = "http://127.0.0.1:8000/index/";
                     } else {
                         alert("账号或密码错误！");
