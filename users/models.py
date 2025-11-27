@@ -13,7 +13,7 @@ class User(models.Model):
     phone = models.CharField(max_length=20, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created_at')
     last_login = models.DateTimeField(null=True, blank=True, verbose_name='last_login')
-
+    points = models.IntegerField(default=0, verbose_name='points')
 
     auth_user = models.OneToOneField(
         AuthUser,
@@ -33,3 +33,50 @@ class User(models.Model):
 
     def __str__(self):
         return self.nickname or self.openid
+
+class Address(models.Model):
+    """
+    用户收货地址表（一个用户可有多个地址）
+    """
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    receiver_name = models.CharField(max_length=50)  # 收货人姓名
+    phone = models.CharField(max_length=20)          # 手机号
+    detail = models.CharField(max_length=200)       # 详细地址
+
+    class Meta:
+        db_table = "address"
+        managed = False
+
+class Coupon(models.Model):
+    """
+    优惠券类型表，如满 100 减 20、无门槛 5 元等
+    """
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    discount_amount = models.IntegerField()   # 优惠金额（单位：元，整数）
+    min_amount = models.IntegerField(default=0)  # 满多少可用（单位：元）
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    is_exchange = models.BooleanField(default=False)  # 是否允许积分兑换
+    cost_points = models.IntegerField(default=0)  # 兑换所需积分
+    is_active = models.BooleanField(default=True)  # 是否上架到积分商城
+    sort_order = models.IntegerField(default=0)  # 排序（越大越靠后）
+    class Meta:
+        db_table = "coupon"
+        managed = False
+
+class UserCoupon(models.Model):
+    """
+    某用户具体拥有的优惠券，例如一个人可有 3 张 “满100减20”
+    """
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    is_used = models.BooleanField(default=False)
+    received_at = models.DateTimeField(auto_now_add=True)
+    used_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "user_coupon"
+        managed = False

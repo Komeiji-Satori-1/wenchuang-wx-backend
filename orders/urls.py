@@ -9,6 +9,10 @@ urlpatterns = [
     path('user-orders/', views.UserOrderListView.as_view(), name='user-orders'),
     path('lists/', views.order_list_view, name='order_list'),
     path('list/<int:order_id>/', views.order_detail_view, name='order_detail'),
-
-
+    path('wechat_get_orderDetail/<str:encrypted_id>/', views.OrderDetailAPIView.as_view(),
+         name='wechat_get_order_detail'),
+    path('wechat_pay/<str:encrypted_id>/', views.OrderPayAPIView.as_view(), name='wechat_pay'),
+    path('wechat_cancel_order/<str:encrypted_id>/', views.OrderCancelAPIView.as_view(),
+         name='wechat_cancel_order'),
+    path('wechat_confirm_order/',views.ConfirmOrderView.as_view(),name='wechat_confirm_order'),
 ]

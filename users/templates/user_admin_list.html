@@ -112,6 +112,7 @@
                             <th>头像</th>
                             <th>昵称</th>
                             <th>OpenID</th>
+                            <th>手机号</th>
                             <th>创建时间</th>
                         </tr>
                         </thead>
@@ -128,6 +129,7 @@
                                 </td>
                                 <td>{{ user.nickname|default:"（未命名）" }}</td>
                                 <td>{{ user.openid }}</td>
+                                <td>{{ user.phone|default:"（未命名）"  }}</td>
                                 <td>{{ user.created_at|date:"Y-m-d H:i" }}</td>
                             </tr>
                         {% endfor %}
@@ -194,6 +196,7 @@ $(document).ready(function() {
             },
             { data: 'nickname' },
             { data: 'openid' },
+            { data: 'phone'},
             { data: 'created_at' }
         ],
         language: {

@@ -280,8 +280,12 @@
             </select>
           </div>
           <div class="mb-3 upload-section">
-            <label class="form-label">图片</label>
+            <label class="form-label">封面图</label>
             <input type="file" class="form-control" name="image" accept="image/*">
+          </div>
+          <div class="mb-3 upload-section">
+            <label class="form-label">轮播图</label>
+            <input type="file" class="form-control" name="images" accept="image/*" multiple>
           </div>
           <button type="submit" class="btn btn-success w-100">提交</button>
         </form>
@@ -325,6 +329,10 @@
           <div class="mb-3">
             <label class="form-label">图片（可选）</label>
             <input type="file" class="form-control" name="image" accept="image/*">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">轮播图（可选）</label>
+            <input type="file" class="form-control" name="images" accept="image/*" multiple>
           </div>
           <button type="submit" class="btn btn-primary w-100">保存修改</button>
         </form>

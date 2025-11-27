@@ -25,6 +25,7 @@
         <th>订单号</th>
         <th>用户</th>
         <th>openid</th>
+        <th>手机号</th>
         <th>状态</th>
         <th>总金额</th>
         <th>下单时间</th>
@@ -37,6 +38,7 @@
         <td>{{ order.id }}</td>
         <td>{{ order.user.nickname }}</td>
         <td>{{ order.user.openid }}</td>
+        <td>{{ order.user.phone }}</td>
         <td>
           {% if order.status == 'pending' %}
             <span class="badge bg-warning text-dark">{{ order.get_status_display }}</span>
@@ -67,7 +69,7 @@ $(document).ready(function() {
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/Chinese.json"
         },
-        "order": [[5, "desc"]],
+        "order": [[6, "desc"]],
         "pageLength": 10,
         "lengthMenu": [5,10,20,50]
     });

@@ -62,3 +62,12 @@ class ProductLog(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.action}"
+
+class ProductImage(models.Model):
+    id = models.AutoField(primary_key=True)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image_url = models.CharField(max_length=255)
+    order = models.IntegerField(default=0)   # 用于排序
+
+    class Meta:
+        db_table = "product_image"

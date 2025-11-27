@@ -1,0 +1,7 @@
+<uwsgi>
+    <socket>127.0.0.1:8000</socket>
+    <chdir>/home/WX_wenchuang_backend/</chdir>
+    <module>app01.wsgi:application</module>
+    <processes>4</processes>
+    <daemonize>uwsgi.log</daemonize>
+</uwsgi>

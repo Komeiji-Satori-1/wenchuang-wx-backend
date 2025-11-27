@@ -1,7 +1,9 @@
 from django.db import models
 from users.models import User
 from products.models import Product
+from users.models import Address,UserCoupon
 # Create your models here.
+
 
 class Orders(models.Model):
     STATUS_CHOICES = [
@@ -13,9 +15,28 @@ class Orders(models.Model):
     ]
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    pay_amount =models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.CharField(max_length=20, default="not_delivery")
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
+    encrypted_id = models.CharField(max_length=64, unique=True, blank=True, null=True)
+    address = models.ForeignKey(
+        Address,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='orders'
+    )
+    user_coupon = models.ForeignKey(
+        UserCoupon,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL
+    )
+
 
     class Meta:
         db_table = 'orders'

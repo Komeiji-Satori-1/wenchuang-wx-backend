@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优惠券管理</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .page-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-4">
+
+    <div class="page-title">优惠券管理</div>
+
+    <!-- 操作栏 -->
+    <div class="mb-3 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">新增优惠券</button>
+    </div>
+
+    <!-- 列表卡片 -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>优惠金额</th>
+                        <th>最低可用金额</th>
+                        <th>兑换积分</th>
+                        <th>是否可兑换</th>
+                        <th>上架</th>
+                        <th>有效期</th>
+                        <th>排序</th>
+                        <th width="150">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="coupon-table-body">
+                    <!-- 数据由 jQuery 渲染 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- 新增优惠券 Modal -->
+<div class="modal fade" id="addCouponModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">新增优惠券</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="add-coupon-form">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">名称</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">优惠金额（元）</label>
+                    <input type="number" class="form-control" name="discount_amount" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">最低使用金额</label>
+                    <input type="number" class="form-control" name="min_amount" required>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">是否可兑换</label>
+                    <select name="is_exchange" class="form-select">
+                        <option value="0">否</option>
+                        <option value="1">是</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">兑换积分</label>
+                    <input type="number" class="form-control" name="cost_points" value="0">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">是否上架</label>
+                    <select name="is_active" class="form-select">
+                        <option value="1">上架</option>
+                        <option value="0">下架</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">排序</label>
+                    <input type="number" class="form-control" name="sort_order" value="0">
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">开始时间</label>
+                    <input type="datetime-local" class="form-control" name="start_time" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">结束时间</label>
+                    <input type="datetime-local" class="form-control" name="end_time" required>
+                </div>
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button class="btn btn-primary" id="submit-add-coupon">提交</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- 编辑优惠券 Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">编辑优惠券</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="edit_id">
+
+        <div class="mb-3">
+            <label>优惠券名称</label>
+            <input type="text" id="edit_name" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>优惠金额（元）</label>
+            <input type="number" id="edit_discount_amount" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>最低消费金额（元）</label>
+            <input type="number" id="edit_min_amount" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">是否可兑换</label>
+            <select id="is_exchange" class="form-select">
+                <option value="0">否</option>
+                <option value="1">是</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">兑换积分</label>
+            <input type="number" class="form-control" id="cost_points" value="0">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">是否上架</label>
+            <select id="is_active" class="form-select">
+                <option value="1">上架</option>
+                <option value="0">下架</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">排序</label>
+            <input type="number" class="form-control" id="sort_order" value="0">
+        </div>
+        <div class="mb-3">
+            <label>开始时间</label>
+            <input type="datetime-local" id="edit_start_time" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label>结束时间</label>
+            <input type="datetime-local" id="edit_end_time" class="form-control">
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button class="btn btn-primary" id="saveEdit">保存修改</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ===== 示例：后端 API 地址（请自行修改） =====
+const BASE_URL = 'http://127.0.0.1:8000/';
+
+const API_LIST = BASE_URL + 'products/coupon/list/';
+const API_ADD = BASE_URL + 'products/coupon/add/';
+const API_DELETE = BASE_URL + 'products/coupon/delete/';
+
+
+// 加载优惠券列表
+function loadCoupons() {
+    $.get(API_LIST, function(res) {
+        let rows = '';
+        res.data.forEach(c => {
+            rows += `
+                <tr>
+                    <td>${c.id}</td>
+                    <td>${c.name}</td>
+                    <td>${c.discount_amount} 元</td>
+                    <td>${c.min_amount}</td>
+                    <td>${c.cost_points}</td>
+                    <td>${c.is_exchange ? '是' : '否'}</td>
+                    <td>${c.is_active ? '上架' : '下架'}</td>
+                    <td>${c.start_time} ~ ${c.end_time}</td>
+                    <td>${c.sort_order}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${c.id}">删除</button>
+                        <button class="btn btn-warning btn-sm edit-btn" data-id="${c.id}">编辑</button>
+                    </td>
+                </tr>`;
+        });
+        $('#coupon-table-body').html(rows);
+    });
+}
+
+loadCoupons();
+
+// 添加优惠券提交
+$('#submit-add-coupon').click(function() {
+    const formData = $('#add-coupon-form').serialize();
+    $.post(API_ADD, formData, function(res) {
+        if (res.code === 200) {
+            alert('新增成功');
+            loadCoupons();
+            $('#addCouponModal').modal('hide');
+        } else {
+            alert('新增失败：' + res.msg);
+        }
+    });
+});
+
+$(document).on("click", ".edit-btn", function () {
+    const id = $(this).data("id");
+
+    $.get(BASE_URL + `products/coupon/get/${id}/`, function (res) {
+        $("#edit_id").val(res.id);
+        $("#edit_name").val(res.name);
+        $("#edit_discount_amount").val(res.discount_amount);
+        $("#edit_min_amount").val(res.min_amount);
+        $("#is_exchange").val(res.is_exchange ? "1" : "0");
+        $("#cost_points").val(res.cost_points)
+        $("#is_active").val(res.is_active ? "1" : "0");
+        $("#sort_order").val(res.sort_order)
+        // 转成 datetime-local 可识别格式
+        $("#edit_start_time").val(res.start_time.replace(" ", "T"));
+        $("#edit_end_time").val(res.end_time.replace(" ", "T"));
+
+        $("#editModal").modal("show");
+    });
+});
+
+$("#saveEdit").click(function () {
+
+    const payload = {
+        id: $("#edit_id").val(),
+        name: $("#edit_name").val(),
+        discount_amount: $("#edit_discount_amount").val(),
+        min_amount: $("#edit_min_amount").val(),
+        is_exchange:$("#is_exchange").val(),
+        cost_points:$("#cost_points").val(),
+        is_active:$("#is_active").val(),
+        sort_order:$("#sort_order").val(),
+        start_time: $("#edit_start_time").val(),
+        end_time: $("#edit_end_time").val(),
+    };
+
+    $.post(BASE_URL + "products/coupon/update/", payload, function (res) {
+        if (res.code === 200) {
+            $("#editModal").modal("hide");
+            loadCoupons();  // 刷新 DataTables
+            alert("更新成功");
+        } else {
+            alert("更新失败");
+        }
+    });
+});
+
+// 删除优惠券
+$(document).on('click', '.delete-btn', function() {
+    const id = $(this).data('id');
+    if (!confirm('确认删除？')) return;
+    $.post(API_DELETE, {id}, function(res) {
+        if (res.code === 200) {
+            loadCoupons();
+        } else {
+            alert('删除失败');
+        }
+    });
+});
+</script>
+
+</body>
+</html>
