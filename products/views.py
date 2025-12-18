@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from django.utils import timezone
 from rest_framework import status
 from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
 @admin_login_required
 def product_home(request):
     products = Product.objects.all()
@@ -33,6 +34,7 @@ def add_product(request):
         stock = request.POST['stock']
         description = request.POST['description']
         image = request.FILES.get('image')
+
         try:
             category = Category.objects.get(id=category_id)
             product = Product.objects.create(
@@ -47,8 +49,8 @@ def add_product(request):
             for index, img in enumerate(images, start=1):
                 ProductImage.objects.create(
                     product=product,
-                    image=img,
-                    order=index,
+                    image_url=img,
+                    order=index
                 )
             new_data = {
                 "name": product.name,
@@ -217,8 +219,15 @@ class CouponListView(APIView):
     """优惠券列表"""
     def get(self, request):
         openid = request.GET.get('openid')
-        user = User.objects.get(openid=openid)
-        user_points = user.points
+        user_points = None
+        if openid:
+            try:
+                user = User.objects.get(openid=openid)
+                user_points = user.points
+            except ObjectDoesNotExist:
+                # 不中断请求，仅将 user_points 保持为 None
+                user_points = None
+
         coupons = Coupon.objects.all().order_by("-sort_order", "-id")
         ser = CouponSerializer(coupons, many=True)
 
@@ -253,6 +262,7 @@ class CouponDetailAPIView(APIView):
             # 时间格式转成前端可直接使用的字符串
             "start_time": coupon.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             "end_time": coupon.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "valid_days": coupon.valid_days,
         }
 
         return Response({"success": True, **data}, status=200)
@@ -329,7 +339,7 @@ class CouponExchangeAPIView(APIView):
                 user_locked.save()
 
                 # 创建 UserCoupon
-                UserCoupon.objects.create(
+                user_coupon=UserCoupon.objects.create(
                     user=user_locked,
                     coupon=coupon,
                 )
@@ -342,4 +352,4 @@ class CouponExchangeAPIView(APIView):
                 {"code": 500, "msg": "兑换失败，请稍后重试"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        return Response({'code': 200, 'msg': '兑换成功'})
+        return Response({'code': 200, 'msg': '兑换成功',"expires_at": user_coupon.expires_at})

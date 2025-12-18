@@ -55,7 +55,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     receiver_phone = serializers.CharField(source='address.phone', read_only=True)
     receiver_address = serializers.CharField(source='address.detail', read_only=True)
 
-    coupon_name = serializers.CharField(source='user_coupon.coupon.name', read_only=True)
+    coupon_id = serializers.CharField(source='user_coupon.coupon.id', read_only=True)
     coupon_discount_amount = serializers.CharField(
         source='user_coupon.coupon.discount_amount',
         read_only=True
@@ -73,7 +73,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
             'receiver_name',
             'receiver_phone',
             'receiver_address',
-            'coupon_name',
+            'coupon_id',
             'coupon_discount_amount',
             'status',
             'status_text',

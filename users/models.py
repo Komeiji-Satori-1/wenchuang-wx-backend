@@ -2,6 +2,7 @@ from django.db import models
 from admin_panel.models import AdminUser
 from django.contrib.auth.models import User as AuthUser
 from django.utils import timezone
+from datetime import timedelta
 # Create your models here.
 
 class User(models.Model):
@@ -62,6 +63,7 @@ class Coupon(models.Model):
     cost_points = models.IntegerField(default=0)  # 兑换所需积分
     is_active = models.BooleanField(default=True)  # 是否上架到积分商城
     sort_order = models.IntegerField(default=0)  # 排序（越大越靠后）
+    valid_days = models.IntegerField(default=7)
     class Meta:
         db_table = "coupon"
         managed = False
@@ -76,7 +78,34 @@ class UserCoupon(models.Model):
     is_used = models.BooleanField(default=False)
     received_at = models.DateTimeField(auto_now_add=True)
     used_time = models.DateTimeField(null=True, blank=True)
-
+    expires_at = models.DateTimeField(null=True, blank=True)
     class Meta:
         db_table = "user_coupon"
         managed = False
+
+    def save(self, *args, **kwargs):
+        # 如果模型是第一次 save，received_at 会是 None，需要手动赋值
+        if self.received_at is None:
+            self.received_at = timezone.now()
+
+        # 如果首次生成优惠券，则自动设置过期日期
+        if not self.expires_at:
+            days = self.coupon.valid_days
+            self.expires_at = self.received_at + timedelta(days=days)
+
+        super().save(*args, **kwargs)
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+    @property
+    def status(self):
+        """返回优惠券状态：unused / used / expired"""
+        now = timezone.now()
+        if self.is_used:
+            return "used"
+        elif self.expires_at and self.expires_at < now:
+            return "expired"
+        else:
+            return "unused"

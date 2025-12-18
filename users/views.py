@@ -9,7 +9,7 @@ from rest_framework import status
 from .models import User,Address,UserCoupon,Coupon
 from orders.models import Orders
 from admin_panel.models import AdminUser
-from .serializers import UserSerializer,AddressSerializer
+from .serializers import UserSerializer,AddressSerializer,UserCouponSerializer
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User as AuthUser
 from admin_panel.decorators import admin_login_required
@@ -223,7 +223,8 @@ class GetUserPhoneNumberView(APIView):
 
 class AddressListAPIView(APIView):
     def get(self, request, user_openid):
-        addresses = Address.objects.filter(user__openid=user_openid)
+        user = User.objects.get(openid=user_openid)
+        addresses = Address.objects.filter(user=user)
         print(addresses)
         serializer = AddressSerializer(addresses, many=True)
         return Response(serializer.data)
@@ -277,6 +278,7 @@ class AddressDetailAPIView(APIView):
 
 class AvailableCouponAPIView(APIView):
     def get(self, request):
+        now = timezone.now()
         openid = request.query_params.get("openid")
         encrypted_id = request.query_params.get("encrypted_id")
         try:
@@ -288,13 +290,14 @@ class AvailableCouponAPIView(APIView):
         coupons = UserCoupon.objects.filter(
             user=user,
             is_used=False,
+            expires_at__gte=now
         )
 
         # 可根据订单金额或商品限制筛选
         order = Orders.objects.get(encrypted_id=encrypted_id)
         available = []
         for uc in coupons:
-            if order.pay_amount >= uc.coupon.min_amount:  # 满足最低消费
+            if order.total_amount >= uc.coupon.min_amount:  # 满足最低消费
                 available.append({
                     "id": uc.coupon_id,
                     "name": uc.coupon.name,
@@ -303,3 +306,23 @@ class AvailableCouponAPIView(APIView):
                 })
 
         return Response({"code": 200, "msg": "获取成功", "data": available})
+
+class UserCouponListAPIView(APIView):
+    """用户优惠券列表"""
+    def get(self, request):
+        openid = request.query_params.get("openid")
+        if not openid:
+            return Response({"code": 400, "msg": "缺少 openid"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(openid=openid)
+        except User.DoesNotExist:
+            return Response({"code": 404, "msg": "用户不存在"}, status=status.HTTP_404_NOT_FOUND)
+
+        coupons = UserCoupon.objects.filter(user=user).select_related("coupon").order_by("-received_at")
+        ser = UserCouponSerializer(coupons, many=True)
+
+        return Response({
+            "code": 200,
+            "msg": "获取成功",
+            "data": ser.data
+        })

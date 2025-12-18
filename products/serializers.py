@@ -54,5 +54,5 @@ class CouponSerializer(serializers.ModelSerializer):
         fields = [
             "id", "name", "discount_amount", "min_amount",
             "is_exchange", "cost_points", "is_active",
-            "start_time", "end_time", "sort_order"
+            "start_time", "end_time", "sort_order","valid_days"
         ]

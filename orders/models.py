@@ -36,6 +36,12 @@ class Orders(models.Model):
         blank=True,
         on_delete=models.SET_NULL
     )
+    out_trade_no = models.CharField(
+        max_length=64,
+        unique=True,
+        null=True,
+        blank=True
+    )
 
 
     class Meta:

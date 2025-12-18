@@ -15,4 +15,6 @@ urlpatterns = [
     path('wechat_cancel_order/<str:encrypted_id>/', views.OrderCancelAPIView.as_view(),
          name='wechat_cancel_order'),
     path('wechat_confirm_order/',views.ConfirmOrderView.as_view(),name='wechat_confirm_order'),
+    path('pay/wechat/create/', views.WechatPayCreateView.as_view(),name='wechat_pay_create'),
+    path('pay/wechat/notify/',views.WechatPayNotifyView.as_view(),name="wechat_pay_notify")
 ]

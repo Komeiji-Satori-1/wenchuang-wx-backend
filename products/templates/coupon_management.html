@@ -50,7 +50,8 @@
                         <th>兑换积分</th>
                         <th>是否可兑换</th>
                         <th>上架</th>
-                        <th>有效期</th>
+                        <th>兑换期</th>
+                        <th>有效期（天）</th>
                         <th>排序</th>
                         <th width="150">操作</th>
                     </tr>
@@ -99,6 +100,11 @@
                     <label class="form-label">兑换积分</label>
                     <input type="number" class="form-control" name="cost_points" value="0">
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label">有效期（天）</label>
+                    <input type="number" class="form-control" name="valid_days" required value="7">
+                </div>
+
                 <div class="col-md-3">
                     <label class="form-label">是否上架</label>
                     <select name="is_active" class="form-select">
@@ -166,6 +172,10 @@
             <label class="form-label">兑换积分</label>
             <input type="number" class="form-control" id="cost_points" value="0">
         </div>
+        <div class="mb-3">
+            <label>有效期（天）</label>
+            <input type="number" id="valid_days" class="form-control">
+        </div>
         <div class="col-md-3">
             <label class="form-label">是否上架</label>
             <select id="is_active" class="form-select">
@@ -223,6 +233,7 @@ function loadCoupons() {
                     <td>${c.is_exchange ? '是' : '否'}</td>
                     <td>${c.is_active ? '上架' : '下架'}</td>
                     <td>${c.start_time} ~ ${c.end_time}</td>
+                    <td>${c.valid_days} 天</td>
                     <td>${c.sort_order}</td>
                     <td>
                         <button class="btn btn-danger btn-sm delete-btn" data-id="${c.id}">删除</button>
@@ -265,7 +276,7 @@ $(document).on("click", ".edit-btn", function () {
         // 转成 datetime-local 可识别格式
         $("#edit_start_time").val(res.start_time.replace(" ", "T"));
         $("#edit_end_time").val(res.end_time.replace(" ", "T"));
-
+        $("#valid_days").val(res.valid_days);
         $("#editModal").modal("show");
     });
 });
@@ -281,6 +292,7 @@ $("#saveEdit").click(function () {
         cost_points:$("#cost_points").val(),
         is_active:$("#is_active").val(),
         sort_order:$("#sort_order").val(),
+        valid_days: $("#valid_days").val(),
         start_time: $("#edit_start_time").val(),
         end_time: $("#edit_end_time").val(),
     };

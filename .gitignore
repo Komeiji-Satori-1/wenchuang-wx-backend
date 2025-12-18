@@ -43,6 +43,13 @@ dist/
 build/
 npm-debug.log
 yarn-error.log
+static/
+css/
+img/
+js/
+plugins/
+media/
+
 
 # === 测试文件 ===
 coverage/
@@ -55,3 +62,4 @@ tests/
 *.crt
 *.key
 *.p12
+certs/

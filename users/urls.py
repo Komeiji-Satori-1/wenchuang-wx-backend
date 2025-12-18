@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import WeChatLoginView, AvailableCouponAPIView
 from .views import UserInfoView
-from .views import GetUserPhoneNumberView,AddressListAPIView,AddressDetailAPIView
+from .views import GetUserPhoneNumberView,AddressListAPIView,AddressDetailAPIView,UserCouponListAPIView
 
 app_name = 'users'
 
@@ -18,5 +18,6 @@ urlpatterns = [
     path('address/<str:user_openid>/', AddressListAPIView.as_view()),
     path('address/detail/<int:pk>/', AddressDetailAPIView.as_view()),
     path('coupon/available/', AvailableCouponAPIView.as_view()),
+    path('coupons/list/', UserCouponListAPIView.as_view(), name='user_coupons_list'),
 
 ]

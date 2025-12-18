@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR / 'appid.env'
@@ -23,12 +22,14 @@ load_dotenv(dotenv_path=env_path)
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=$*)jh&1etifcb%yn%sm=1j8exz1htyes9)uh2!qj5911wot80'
+#django-insecure-=$*)jh&1etifcb%yn%sm=1j8exz1htyes9)uh2!qj5911wot80
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'default-key-for-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.108','localhost','127.0.0.1','192.168.43.112','192.168.31.121']
+ALLOWED_HOSTS = ['192.168.0.108','localhost','127.0.0.1','192.168.0.100','192.168.31.121',
+                 '192.168.0.101','xdwenchuang.cn','www.xdwenchuang.cn','123.56.15.183']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -63,7 +64,7 @@ ROOT_URLCONF = 'app01.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,12 +89,29 @@ REST_FRAMEWORK = {
 
 
 WSGI_APPLICATION = 'app01.wsgi.application'
-print("Loaded WECHAT_APPID:", os.environ.get('WECHAT_APPID'))
-
 
 WECHAT_APPID = os.environ.get('WECHAT_APPID')
 WECHAT_SECRET = os.environ.get('WECHAT_SECRET')
 
+WX_APPID = os.getenv("WECHAT_APPID")
+WX_MCHID = os.getenv("MCHID")
+WX_API_V3_KEY = os.getenv("API_V3_KEY")
+
+WX_CERT_DIR = os.getenv("WX_CERT_DIR")
+
+WX_MCH_PRIVATE_KEY_PATH = os.path.join(
+    WX_CERT_DIR, "apiclient_key.pem"
+)
+
+WX_MCH_CERT_PATH = os.path.join(
+    WX_CERT_DIR, "apiclient_cert.pem"
+)
+
+WX_WECHATPAY_CERT_PATH = os.path.join(
+    WX_CERT_DIR, "wechatpay_cert.pem"
+)
+WX_NOTIFY_URL = "https://xdwenchuang.cn/api/orders/pay/wechat/notify/"
+WX_MCH_CERT_SERIAL_NO = os.getenv("WX_MCH_CERT_SERIAL_NO")
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
@@ -102,7 +120,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'wenchuang_program',
         'USER': 'root',
-        'PASSWORD': '050902',
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {
@@ -137,11 +155,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -149,8 +167,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / "static"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
